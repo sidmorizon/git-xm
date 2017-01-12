@@ -6,6 +6,7 @@ const program = require('commander');
 const qs = require('qs');
 const packageJSON = require('../package.json');
 const colors = require('colors/safe');
+const gitAliasList = require('./git-alias');
 
 
 colors.setTheme({
@@ -89,10 +90,19 @@ function createMergeRequestUrl(repoOwner, repoName, fromBranch, toBranch) {
     shelljs.exec(`open "${_url}"`)
 }
 
+function setGitAlias(aliasName, command) {
+    shelljs.exec(`git config --global alias.${aliasName} ${command}`);
+    logInfo(`创建alias： git ${aliasName} \n  ==> git ${eval(command)}`)
+}
+
 program
     .version(VERSION)
     .option('--update-self', 'git-xm自我更新', function(){
         shelljs.exec(`npm install git-xm@latest -g`);
+    })
+    .option('--set-alias', '设置一些常用alias', function () {
+        Object.keys(gitAliasList)
+            .forEach(aliasName=>setGitAlias(aliasName, gitAliasList[aliasName]));
     })
     .command('mr <toBranch>')
     .description(`create coding MERGE REQUEST!`)
@@ -159,18 +169,22 @@ program.on('--help', function () {
     ----------------------------------------------------
     示例:
 
-    # 查看命令帮助
-    $ git xm 
-    
-    # 自我更新
-    $ git xm --update-self
-    
     # 创建当前分支到master的Merge Request
     $ git xm mr master
     
     # 创建当前分支到dev的Merge Request
     $ git xm mr dev
-
+    
+    # 自我更新
+    $ git xm --update-self
+    
+    # 设置一些常用的git alias 
+    # 例如：git co ==> git checkout;  git st ==> git status;  git br ==> git branch
+    $ git xm --set-alias 
+    
+    # 查看命令帮助
+    $ git xm 
+    
 `);
 });
 
