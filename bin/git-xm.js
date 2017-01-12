@@ -156,7 +156,9 @@ program.parse(process.argv);
 
 // 新增自定义帮助
 program.on('--help', function () {
-    console.log(`  Examples:
+    console.log(`  示例:
+    VERSION ${VERSION}
+    
     # 查看命令帮助
     $ git xm -h
     
