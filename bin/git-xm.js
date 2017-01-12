@@ -95,16 +95,23 @@ program
     .description(`create coding MERGE REQUEST!`)
     .action(function (toBranch) {
         // 自动创建MR https://coding.net/u/coding/pp/109336
+        logInfo(`fetch远程代码`);
         shelljs.exec(`git fetch --prune origin`);
         let fromBranch = getCurrentGitBranch();
         let mrBranch = `@mr/${toBranch}/${fromBranch}`;
         const matchMRrule = new RegExp(`^\\@mr\\/${toBranch}\\/(.*)$`).exec(fromBranch);
+
+        // 如果当前分支已经是@mr分支（常见于合并时，出现冲突的情况）
         if (matchMRrule) {
             mrBranch = fromBranch;
             fromBranch = matchMRrule[1];
         }
         const codingRepoInfo = getCodingRepoInfo();
-
+        logInfo(`
+        from branch： ${$cyan1(fromBranch)} 
+        @mr branch： ${$cyan1(mrBranch)}
+        to branch： ${$cyan1(toBranch)}
+`);
 
         if (fromBranch === toBranch) {
             logError('fromBranch CAN NOT be equal to toBranch!');
@@ -115,26 +122,30 @@ program
             pullOriginBranch(fromBranch);
         }
 
-
-        // 开出新merge分支（如果不是@mr/开头）
-        shelljs.exec(`git branch -D ${mrBranch}`);
-        shelljs.exec(`git checkout -B ${mrBranch}`);
         // 拉取目标分支
         if (isRemoteBranchExists(toBranch)) {
+            // 开出新merge分支（如果不是@mr/开头）
+            logInfo(`创建临时@mr分支`);
+            shelljs.exec(`git branch -D ${mrBranch}`);
+            shelljs.exec(`git checkout -B ${mrBranch}`);
             pullOriginBranch(toBranch);
         } else {
             logError(`branch [ ${toBranch} ] IS NOT exists, please check!`);
             process.exit(1);
         }
+
         // 自动提交并推送
+        logInfo(`merge、commit、push`);
         shelljs.exec(`git commit -am"git-xm: AUTO MERGE"`);
         shelljs.exec(`git push origin ${mrBranch}:${mrBranch} --force`);
 
         // 打开merge url
+        logInfo(`打开coding的MR页面`);
         createMergeRequestUrl(codingRepoInfo.owner, codingRepoInfo.name, mrBranch, toBranch);
 
         // 切回原分支
-        shelljs.exec(`git checkout ${fromBranch}`)
+        logInfo(`切回原分支： ${fromBranch}`);
+        shelljs.exec(`git checkout ${fromBranch}`);
     });
 
 
