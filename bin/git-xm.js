@@ -152,8 +152,9 @@ program
         shelljs.exec(`git checkout ${fromBranch}`);
     });
 
+program.parse(process.argv);
 
-// 新增帮助
+// 新增自定义帮助
 program.on('--help', function () {
     console.log(`  Examples:
     # 查看命令帮助
@@ -168,5 +169,7 @@ program.on('--help', function () {
 `);
 });
 
-
-program.parse(process.argv);
+// 没有任何参数时，默认显示帮助
+if (!process.argv.slice(2).length) {
+    program.outputHelp(colors.green);
+}
