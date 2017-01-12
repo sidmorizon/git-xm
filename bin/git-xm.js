@@ -104,6 +104,9 @@ program
         Object.keys(gitAliasList)
             .forEach(aliasName=>setGitAlias(aliasName, gitAliasList[aliasName]));
     })
+    .option('--show-alias','查看当前alias',function () {
+        shelljs.exec(`git config -l | grep alias`);
+    })
     .command('mr <toBranch>')
     .description(`create coding MERGE REQUEST!`)
     .action(function (toBranch) {
