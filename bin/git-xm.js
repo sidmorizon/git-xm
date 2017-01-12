@@ -104,7 +104,7 @@ program
         Object.keys(gitAliasList)
             .forEach(aliasName=>setGitAlias(aliasName, gitAliasList[aliasName]));
     })
-    .option('--show-alias','查看当前alias',function () {
+    .option('--show-alias','查看已设置的alias',function () {
         shelljs.exec(`git config -l | grep alias`);
     })
     .command('mr <toBranch>')
@@ -184,6 +184,8 @@ program.on('--help', function () {
     # 设置一些常用的git alias 
     # 例如：git co ==> git checkout;  git st ==> git status;  git br ==> git branch
     $ git xm --set-alias 
+    # 查看已设置的alias
+    $ git xm --show-alias
     
     # 查看命令帮助
     $ git xm 
