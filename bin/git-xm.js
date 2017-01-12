@@ -152,8 +152,6 @@ program
         shelljs.exec(`git checkout ${fromBranch}`);
     });
 
-program.parse(process.argv);
-
 // 新增自定义帮助
 program.on('--help', function () {
     console.log(`
@@ -162,7 +160,10 @@ program.on('--help', function () {
     示例:
 
     # 查看命令帮助
-    $ git xm -h
+    $ git xm 
+    
+    # 自我更新
+    $ git xm --update-self
     
     # 创建当前分支到master的Merge Request
     $ git xm mr master
@@ -172,6 +173,9 @@ program.on('--help', function () {
 
 `);
 });
+
+program.parse(process.argv);
+
 
 // 没有任何参数时，默认显示帮助
 if (!process.argv.slice(2).length) {
