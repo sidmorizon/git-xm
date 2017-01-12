@@ -125,7 +125,7 @@ program
         // 拉取目标分支
         if (isRemoteBranchExists(toBranch)) {
             // 开出新merge分支（如果不是@mr/开头）
-            logInfo(`创建临时@mr分支`);
+            logInfo(`创建@mr临时分支: ${$cyan1(mrBranch)}`);
             shelljs.exec(`git branch -D ${mrBranch}`);
             shelljs.exec(`git checkout -B ${mrBranch}`);
             pullOriginBranch(toBranch);
@@ -135,8 +135,9 @@ program
         }
 
         // 自动提交并推送
-        logInfo(`merge、commit、push`);
+        logInfo(`merge & commit`);
         shelljs.exec(`git commit -am"git-xm: AUTO MERGE"`);
+        logInfo(`push`);
         shelljs.exec(`git push origin ${mrBranch}:${mrBranch} --force`);
 
         // 打开merge url
