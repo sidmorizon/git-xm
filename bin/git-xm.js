@@ -38,7 +38,9 @@ function getCurrentGitBranch() {
 }
 
 function pullOriginBranch(branchName) {
-    const execResult = shelljs.exec(`git pull origin ${branchName}`);
+    const cmdStr = `git pull origin ${branchName}`;
+    logInfo(`拉取代码中，注意处理冲突： `, $cyan1(cmdStr));
+    const execResult = shelljs.exec(cmdStr);
     if (execResult.code) {
         logError(execResult.stdout);
         process.exit(1);
@@ -125,7 +127,7 @@ program
             process.exit(1);
         }
         // 自动提交并推送
-        shelljs.exec(`git commit -am"AUTO MERGE"`);
+        shelljs.exec(`git commit -am"git-xm: AUTO MERGE"`);
         shelljs.exec(`git push origin ${mrBranch}:${mrBranch} --force`);
 
         // 打开merge url
@@ -139,7 +141,15 @@ program
 // 新增帮助
 program.on('--help', function () {
     console.log(`  Examples:
-TODO
+    # 查看命令帮助
+    $ git xm -h
+    
+    # 创建当前分支到master的Merge Request
+    $ git xm mr master
+    
+    # 创建当前分支到dev的Merge Request
+    $ git xm mr dev
+
 `);
 });
 
