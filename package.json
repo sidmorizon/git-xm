@@ -1,0 +1,21 @@
+{
+  "name": "git-xm",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@git.coding.net:xmjk-fe/git-xm.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "colors": "^1.1.2",
+    "commander": "^2.9.0",
+    "qs": "^6.3.0",
+    "shelljs": "^0.7.6"
+  }
+}
