@@ -91,6 +91,9 @@ function createMergeRequestUrl(repoOwner, repoName, fromBranch, toBranch) {
 
 program
     .version(VERSION)
+    .option('--update-self', 'git-xm自我更新', function(){
+        shelljs.exec(`npm install git-xm@latest -g`);
+    })
     .command('mr <toBranch>')
     .description(`create coding MERGE REQUEST!`)
     .action(function (toBranch) {
