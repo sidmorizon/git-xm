@@ -6,6 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "bin": {
+    "git-xm": "bin/git-xm.js"
+  },
   "repository": {
     "type": "git",
     "url": "git@git.coding.net:xmjk-fe/git-xm.git"
