@@ -4,7 +4,7 @@
 - 直接输入`git xm`即可查看帮助
 - 增加`git xm --update-self`自我更新命令
 - 增加`git xm --set-alias`创建常用alias，例如`git co ==> git checkout;  git st ==> git status;  git br ==> git branch`
-- 增加`git xm--show-alias`查看当前设置的alias
+- 增加`git xm --show-alias`查看当前设置的alias
 - 代码迁移到 https://github.com/zuozhuo/git-xm
 - 优化控制台输错信息
 
