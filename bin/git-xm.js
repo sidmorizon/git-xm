@@ -44,7 +44,7 @@ function pullOriginBranch(branchName) {
     const execResult = shelljs.exec(cmdStr);
     if (execResult.code) {
         logError(execResult.stdout);
-        process.exit(1);
+        return process.exit(1);
     }
 }
 
@@ -69,7 +69,7 @@ function getCodingRepoInfo() {
     }
     if (!gitOwner || !gitRepoName) {
         logError(`Can not get gitOwner and gitRepoName, please check your repo config`);
-        process.exit(1);
+        return process.exit(1);
     }
 
     logInfo(`RepoOwner: ${$cyan1(gitOwner)}`);
@@ -97,18 +97,18 @@ function setGitAlias(aliasName, command) {
 
 program
     .version(VERSION)
-    .option('--update-self', 'git-xm自我更新', function(){
+    .option('--update-self', 'git-xm自我更新', function () {
         shelljs.exec(`npm install git-xm@latest -g`);
     })
     .option('--set-alias', '设置一些常用alias', function () {
         Object.keys(gitAliasList)
             .forEach(aliasName=>setGitAlias(aliasName, gitAliasList[aliasName]));
     })
-    .option('--show-alias','查看已设置的alias',function () {
+    .option('--show-alias', '查看已设置的alias', function () {
         shelljs.exec(`git config -l | grep alias`);
     })
     .command('mr <toBranch>')
-    .description(`create coding MERGE REQUEST!`)
+    .description(`创建当前分支到目标分支的merge request （coding.net）`)
     .action(function (toBranch) {
         // 自动创建MR https://coding.net/u/coding/pp/109336
         logInfo(`fetch远程代码`);
@@ -117,7 +117,7 @@ program
         let mrBranch = `@mr/${toBranch}/${fromBranch}`;
         const matchMRrule = new RegExp(`^\\@mr\\/${toBranch}\\/(.*)$`).exec(fromBranch);
 
-        // 如果当前分支已经是@mr分支（常见于合并时，出现冲突的情况）
+        // 如果当前分支已经是@mr分支（常见于合并时，出现冲突后，停留在@mr分支）
         if (matchMRrule) {
             mrBranch = fromBranch;
             fromBranch = matchMRrule[1];
@@ -128,27 +128,27 @@ program
         @mr branch： ${$cyan1(mrBranch)}
         to branch： ${$cyan1(toBranch)}
 `);
+        if (!isRemoteBranchExists(toBranch)) {
+            logError(`目标分支 [ ${toBranch} ] 不存在！`);
+            return process.exit(1);
+        }
 
         if (fromBranch === toBranch) {
-            logError('fromBranch CAN NOT be equal to toBranch!');
-            return;
+            logError('源分支与目标分支不能相同！');
+            return process.exit(1);
         }
 
         if (isRemoteBranchExists(fromBranch)) {
             pullOriginBranch(fromBranch);
         }
 
+        // 开出新merge分支（如果不是@mr/开头）
+        logInfo(`创建@mr临时分支: ${$cyan1(mrBranch)}`);
+        shelljs.exec(`git branch -D ${mrBranch}`);
+        shelljs.exec(`git checkout -B ${mrBranch}`);
+
         // 拉取目标分支
-        if (isRemoteBranchExists(toBranch)) {
-            // 开出新merge分支（如果不是@mr/开头）
-            logInfo(`创建@mr临时分支: ${$cyan1(mrBranch)}`);
-            shelljs.exec(`git branch -D ${mrBranch}`);
-            shelljs.exec(`git checkout -B ${mrBranch}`);
-            pullOriginBranch(toBranch);
-        } else {
-            logError(`branch [ ${toBranch} ] IS NOT exists, please check!`);
-            process.exit(1);
-        }
+        pullOriginBranch(toBranch);
 
         // 自动提交并推送
         logInfo(`merge & commit`);
@@ -169,6 +169,7 @@ program
 program.on('--help', function () {
     console.log(`
     VERSION: ${VERSION}
+    GITHUB: https://github.com/zuozhuo/git-xm
     ----------------------------------------------------
     示例:
 
