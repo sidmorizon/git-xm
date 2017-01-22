@@ -106,7 +106,7 @@ program
     })
     .option('--show-alias', '查看已设置的alias', function () {
         shelljs.exec(`git config -l | grep alias`);
-    })
+    });
 
 program.command('mr [toBranch]')
     .description(`创建当前分支到目标分支的merge request （coding.net）`)
@@ -174,11 +174,15 @@ program.command('rm-all-mr')
 
         const cmdResult = shelljs.exec(`git branch ${rmRemote ? '-r' : ''} | grep "@mr/"`);
         if (cmdResult.code === 0) {
-            const branchesStr = cmdResult.stdout
+            const branches = cmdResult.stdout
                 .split('\n')
-                .map(s=>s.trim())
-                .join(' ');
-            shelljs.exec(`git branch ${rmRemote ? '-r' : ''} -D ${branchesStr}`);
+                .map(s=>s.trim());
+            shelljs.exec(`git branch ${rmRemote ? '-r' : ''} -D ${branches.join(' ')}`);
+            if (rmRemote) {
+                branches.forEach(b=> {
+                    shelljs.exec(`git push origin :${b}`);
+                })
+            }
         }
 
     });
@@ -211,6 +215,7 @@ program.on('--help', function () {
     $ git xm 
     
 `);
+    
 });
 
 program.parse(process.argv);

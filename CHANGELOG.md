@@ -1,4 +1,4 @@
-## 1.1.2
+## 1.1.3
 
 - 增加`git xm rm-all-mr`删除所有本地的`@mr`分支
     - `git xm rm-all-mr -r`删除所有远程的`@mr`分支
