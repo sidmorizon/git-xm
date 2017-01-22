@@ -107,7 +107,8 @@ program
     .option('--show-alias', '查看已设置的alias', function () {
         shelljs.exec(`git config -l | grep alias`);
     })
-    .command('mr <toBranch>')
+
+program.command('mr [toBranch]')
     .description(`创建当前分支到目标分支的merge request （coding.net）`)
     .action(function (toBranch) {
         // 自动创建MR https://coding.net/u/coding/pp/109336
@@ -164,6 +165,24 @@ program
         logInfo(`切回原分支： ${fromBranch}`);
         shelljs.exec(`git checkout ${fromBranch}`);
     });
+
+program.command('rm-all-mr')
+    .description(`删除所有@mr分支`)
+    .option('-r,--remote ', '删除所有远程@mr分支')
+    .action(function (options) {
+        const rmRemote = !!options.remote;
+
+        const cmdResult = shelljs.exec(`git branch ${rmRemote ? '-r' : ''} | grep "@mr/"`);
+        if (cmdResult.code === 0) {
+            const branchesStr = cmdResult.stdout
+                .split('\n')
+                .map(s=>s.trim())
+                .join(' ');
+            shelljs.exec(`git branch ${rmRemote ? '-r' : ''} -D ${branchesStr}`);
+        }
+
+    });
+
 
 // 新增自定义帮助
 program.on('--help', function () {
