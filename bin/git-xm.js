@@ -39,7 +39,7 @@ function getCurrentGitBranch() {
 }
 
 function pullOriginBranch(branchName) {
-    const cmdStr = `git pull origin ${branchName}`;
+    const cmdStr = `git pull origin ${branchName} --no-edit`;
     logInfo(`拉取代码中，注意处理冲突： `, $cyan1(cmdStr));
     const execResult = shelljs.exec(cmdStr);
     if (execResult.code) {
