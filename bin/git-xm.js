@@ -176,10 +176,12 @@ program.command('rm-all-mr')
         if (cmdResult.code === 0) {
             const branches = cmdResult.stdout
                 .split('\n')
-                .map(s=>s.trim());
+                .map(s=>s.trim())
+                .filter(s=>!!s);
             shelljs.exec(`git branch ${rmRemote ? '-r' : ''} -D ${branches.join(' ')}`);
             if (rmRemote) {
                 branches.forEach(b=> {
+                    b = b.replace(/^origin\//i,'');
                     shelljs.exec(`git push origin :${b}`);
                 })
             }
@@ -215,7 +217,7 @@ program.on('--help', function () {
     $ git xm 
     
 `);
-    
+
 });
 
 program.parse(process.argv);
