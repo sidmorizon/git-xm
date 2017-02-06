@@ -7,6 +7,7 @@ const qs = require('qs');
 const packageJSON = require('../package.json');
 const colors = require('colors/safe');
 const gitAliasList = require('./git-alias');
+const moment = require('moment');
 
 
 colors.setTheme({
@@ -95,6 +96,7 @@ function setGitAlias(aliasName, command) {
     logInfo(`创建alias： git ${aliasName} \n  ==> git ${eval(command)}`)
 }
 
+
 program
     .version(VERSION)
     .option('--update-self', 'git-xm自我更新', function () {
@@ -181,7 +183,7 @@ program.command('rm-all-mr')
             shelljs.exec(`git branch ${rmRemote ? '-r' : ''} -D ${branches.join(' ')}`);
             if (rmRemote) {
                 branches.forEach(b=> {
-                    b = b.replace(/^origin\//i,'');
+                    b = b.replace(/^origin\//i, '');
                     shelljs.exec(`git push origin :${b}`);
                 })
             }
@@ -189,6 +191,53 @@ program.command('rm-all-mr')
 
     });
 
+program.command('rm-br')
+    .description(`删除30天之前的远程分支`)
+    .option('-d,--days', '删除多少天之前的，最低为30天')
+    .action(function (options) {
+        let days = parseInt(options);
+        if (isNaN(days) || days < 30) {
+            days = 30;
+        }
+        const deleteDate = moment().subtract(days, 'days');
+        const cmdResult = shelljs.exec(`git branch -r`);
+        if (cmdResult.code === 0) {
+            const branches = cmdResult.stdout
+                .split('\n') // 取出每一行
+                .map(s=>s.trim().replace(/^origin\//i, '').trim()) // 获取分支名（去掉origin/）
+                .filter(s=>!!s); // 排除空行
+
+            branches.forEach(branch=> {
+                const originBranch = `origin/${branch}`;
+                console.log('----------------------------------------------------')
+                console.log(`分支： ${originBranch}`);
+                if (branch === 'master' || branch === 'test' || branch === 'dev' || /^HEAD/.test(branch)) {
+                    console.log(`保护分支，禁止删除: ${originBranch}`);
+                    return;
+                }
+                const lastCommitDateStr = shelljs.exec(`git log -n1 "${originBranch}" | grep "Date:"`).stdout;
+                console.log(`最后提交时间： ${lastCommitDateStr}`);
+                const lastCommitDateMomemt = moment(lastCommitDateStr.replace(/^Date:\s*/i, ''), 'ddd MMM D HH:mm:ss gggg ZZ');
+                if (!lastCommitDateMomemt.isValid()) {
+                    console.log(`无法读取正确时间`);
+                    return;
+                }
+                const lastCommitDate = lastCommitDateMomemt.toDate();
+                console.log(`最后提交时间(parse)： ${lastCommitDate}`);
+                if (lastCommitDate > deleteDate) {
+                    console.log(`最后提交时间小于${days}天内，该分支不删除`);
+                    return;
+                }
+
+                console.log(`开始删除分支: ${originBranch}`);
+                shelljs.exec(`git branch -r -D ${originBranch}`);
+                shelljs.exec(`git push origin :${branch}`);
+                // console.log(`git branch -r -D ${originBranch}`);
+                // console.log(`git push origin :${branch}`);
+            });
+        }
+
+    });
 
 // 新增自定义帮助
 program.on('--help', function () {
