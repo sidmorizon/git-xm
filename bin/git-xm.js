@@ -217,7 +217,7 @@ program.command('rm-br')
                 }
                 const lastCommitDateStr = shelljs.exec(`git log -n1 "${originBranch}" | grep "Date:"`).stdout;
                 console.log(`最后提交时间： ${lastCommitDateStr}`);
-                const lastCommitDateMomemt = moment(lastCommitDateStr.replace(/^Date:\s*/i, ''), 'ddd MMM D HH:mm:ss gggg ZZ');
+                const lastCommitDateMomemt = moment(lastCommitDateStr.replace(/^Date:\s*/i, ''), 'ddd MMM D HH:mm:ss YYYY ZZ');
                 if (!lastCommitDateMomemt.isValid()) {
                     console.log(`无法读取正确时间`);
                     return;
